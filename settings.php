@@ -77,5 +77,11 @@ if (is_siteadmin()) {
         'Show cite-source comments under post when enabled',
         1
     ));
+    $settings->add(new admin_setting_configtext(
+        'tiny_cursive/batch_size',
+        'Batch Size',
+        'Set the limit for the number of files to be upload in every cron',
+        5
+    ));
 
 }

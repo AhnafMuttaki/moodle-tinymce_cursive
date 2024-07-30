@@ -63,9 +63,10 @@ class upload_student_json_cron extends \core\task\scheduled_task {
        
         $sql = "SELECT tcf.* 
                   FROM {tiny_cursive_files} AS tcf
-                 WHERE tcf.timemodified > tcf.uploaded";
+                 WHERE tcf.uploaded = 0 
+                       AND tcf.selected = 1";
         $filerecords = $DB->get_records_sql($sql);
-        $dirname = $CFG->dataroot . '/temp/userdata/';
+        $dirname = "$CFG->tempdir/userdata/";
 
         $table = 'tiny_cursive_files';
         foreach ($filerecords as $filerecord) {
