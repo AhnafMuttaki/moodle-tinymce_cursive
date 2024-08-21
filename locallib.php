@@ -35,7 +35,7 @@
  * */
 function get_user_attempts_data($userid, $courseid, $moduleid, $orderby = 'id', $order = 'ASC', $page = 0, $limit = 10)
 {
-    global $DB;
+    global $DB, $USER;
 
     $params = [];
     $odby = 'u.id';
@@ -51,6 +51,9 @@ function get_user_attempts_data($userid, $courseid, $moduleid, $orderby = 'id', 
             $odby = 'uf.timemodified';
             break;
     }
+    $teacherSql = " INNER JOIN {role_assignments} ra ON ra.userid = :teacherid
+                    INNER JOIN {context} ctx ON ra.contextid = ctx.id AND ctx.contextlevel = 50
+                    INNER JOIN {course} c ON c.id = ctx.instanceid AND c.id = uf.courseid";
 
     $sql = "SELECT uf.id AS fileid, u.id AS usrid,uw.id AS uniqueid, u.firstname, u.lastname,u.email,uf.courseid,
                     uf.id AS attemptid,uf.timemodified, uf.cmid AS cmid,
@@ -62,10 +65,18 @@ function get_user_attempts_data($userid, $courseid, $moduleid, $orderby = 'id', 
                     uw.backspace_percent AS backspace_percent, uw.score AS score,
                     uw.copy_behavior AS copy_behavior
               FROM  {tiny_cursive_files} uf
-        INNER JOIN {user} u ON uf.userid = u.id
-         LEFT JOIN {tiny_cursive_user_writing} uw ON uw.file_id = uf.id
+        INNER JOIN {user} u ON uf.userid = u.id ";
+
+    if ($USER->id != $userid && !is_siteadmin($USER) || get_admin()->id != $USER->id ) {
+      
+        $sql .= $teacherSql;
+        $params['teacherid'] = $USER->id;
+    }
+   
+    $sql2 = " LEFT JOIN {tiny_cursive_user_writing} uw ON uw.file_id = uf.id
              WHERE uf.userid != 1 ";
 
+    $sql .= $sql2;
     if ($userid != 0) {
         $sql .= " AND uf.userid = :userid";
         $params['userid'] = $userid;
@@ -100,6 +111,7 @@ function get_user_attempts_data($userid, $courseid, $moduleid, $orderby = 'id', 
         error_log("Error executing query: " . $e->getMessage());
         throw new moodle_exception('errorreadingfromdatabase', 'error', '', null, $e->getMessage());
     }
+
     return ['count' => $totalcount, 'data' => $res];
 }
 
@@ -213,7 +225,7 @@ function get_user_profile_data($userid, $courseid = 0)
 function get_user_submissions_data($resourceid, $modulename, $cmid, $courseid = 0)
 {
     global $CFG, $DB;
-    require_once ($CFG->dirroot . "/lib/editor/tiny/plugins/cursive/lib.php");
+    require_once($CFG->dirroot . "/lib/editor/tiny/plugins/cursive/lib.php");
     $userid = $resourceid;
     $sql = "SELECT uw.total_time_seconds, uw.word_count, uw.words_per_minute,
                    uw.backspace_percent, uw.score, uw.copy_behavior, uf.resourceid,
@@ -246,8 +258,8 @@ function get_user_submissions_data($resourceid, $modulename, $cmid, $courseid = 
     if (!isset($data['filename'])) {
         $sql = 'SELECT id as fileid, userid, filename
                   FROM {tiny_cursive_files}
-                 WHERE userid = ' . $resourceid . 
-                       ' AND cmid = :cmid 
+                 WHERE userid = ' . $resourceid .
+            ' AND cmid = :cmid 
                        AND modulename = :modulename';
         $filename = $DB->get_record_sql($sql, ['userid' => $resourceid, 'cmid' => $cmid, 'modulename' => $modulename]);
 

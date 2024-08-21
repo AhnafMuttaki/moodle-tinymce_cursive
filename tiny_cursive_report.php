@@ -45,7 +45,16 @@ if ($courseid) {
     $cmid = tiny_cursive_get_cmid($courseid);
     $context = context_module::instance($cmid);
 } else {
-    $context = context_system::instance();
+    if (!is_siteadmin()) {
+        $capability = 'moodle/course:manageactivities';
+        $enrolled_courses = array_values(enrol_get_users_courses($USER->id));
+        $course = $enrolled_courses[0];
+        $context = context_course::instance($course->id);
+        $haseditcapability = has_capability('moodle/course:manageactivities', $context);
+    }else {
+        $context = context_system::instance();
+        $haseditcapability = has_capability('moodle/course:manageactivities', $context);
+    }
 }
 
 $haseditcapability = has_capability('tiny/cursive:view', $context);

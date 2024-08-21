@@ -168,7 +168,7 @@ class tiny_cursive_renderer extends plugin_renderer_base
         } else {
             $courses = $DB->get_records_sql($sql, ['userid' => $USER->id]);
         }
-
+        
         $options = [];
         $currentUrl = new moodle_url($baseurl, ['userid' => $userid, 'courseid' => null]);
         $allCoursesUrl = $currentUrl->out(false, ['courseid' => null]);
@@ -198,7 +198,7 @@ class tiny_cursive_renderer extends plugin_renderer_base
         $table->id = 'writing_report_table';
         $totalcount = $users['count'];
         $data = $users['data'];
-
+       
         $table->head = [
             get_string('module_name', 'tiny_cursive'),
             get_string('last_modified', 'tiny_cursive'),
@@ -216,6 +216,7 @@ class tiny_cursive_renderer extends plugin_renderer_base
 
         foreach ($data as $user) {
             $courseid = $user->courseid;
+
             $cm = null;
             if ($courseid) {
                 $modinfo = get_fast_modinfo($courseid);
@@ -271,27 +272,27 @@ class tiny_cursive_renderer extends plugin_renderer_base
         echo get_string("learn_more", "tiny_cursive");
         echo html_writer::end_tag('span');
         echo html_writer::end_tag('div');
-        echo html_writer::start_tag('script', array('type' => 'text/template', 'id' => 'aria-descriptions-script'));
-        echo "document.querySelectorAll('#writing_report_table tr th').forEach((el, index) => {
-                switch (index) {
-                    case 0:
-                        el.setAttribute('aria-describedby','');
-                        break;
-                    case 1:
-                        el.setAttribute('aria-describedby','');
-                        break;
-                    case 2:
-                        el.setAttribute('aria-describedby','');
-                        break;
-                    case 3:
-                        el.setAttribute('aria-describedby','');
-                        break;
-                    case 4:
-                        el.setAttribute('aria-describedby','TypeID is a confidence score related to authorship');
-                        break;
-                }
-            });";
-        echo html_writer::end_tag('script');
+        // echo html_writer::start_tag('script', array('type' => 'text/template', 'id' => 'aria-descriptions-script'));
+        // echo "document.querySelectorAll('#writing_report_table tr th').forEach((el, index) => {
+        //         switch (index) {
+        //             case 0:
+        //                 el.setAttribute('aria-describedby','');
+        //                 break;
+        //             case 1:
+        //                 el.setAttribute('aria-describedby','');
+        //                 break;
+        //             case 2:
+        //                 el.setAttribute('aria-describedby','');
+        //                 break;
+        //             case 3:
+        //                 el.setAttribute('aria-describedby','');
+        //                 break;
+        //             case 4:
+        //                 el.setAttribute('aria-describedby','TypeID is a confidence score related to authorship');
+        //                 break;
+        //         }
+        //     });";
+        // echo html_writer::end_tag('script');
 
     }
 

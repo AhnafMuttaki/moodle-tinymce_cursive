@@ -23,13 +23,13 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require (__DIR__ . '/../../../../../config.php');
-require_once ($CFG->dirroot . '/mod/quiz/lib.php');
-require_once ($CFG->dirroot . '/mod/quiz/locallib.php');
-require_once (__DIR__ . '/classes/forms/wrreportform.php');
-require_once (__DIR__ . '/locallib.php');
+require(__DIR__ . '/../../../../../config.php');
+require_once($CFG->dirroot . '/mod/quiz/lib.php');
+require_once($CFG->dirroot . '/mod/quiz/locallib.php');
+require_once(__DIR__ . '/classes/forms/wrreportform.php');
+require_once(__DIR__ . '/locallib.php');
 
-global $CFG, $DB, $USER, $PAGE, $OUTPUT;
+global $CFG, $DB, $USER, $PAGE, $OUTPUT, $COURSE;
 require_login(null, false);
 
 if (isguestuser()) {
@@ -43,15 +43,25 @@ if (\core\session\manager::is_loggedinas()) {
 
 $userid = optional_param('userid', 0, PARAM_INT);
 $courseid = optional_param('courseid', 0, PARAM_INT);
+$hascapability = "";
 if ($courseid) {
     $cmid = tiny_cursive_get_cmid($courseid);
     $context = context_module::instance($cmid);
+    $hascapability = has_capability('tiny/cursive:view', $context);
 } else {
-    $context = context_system::instance();
+    if (!is_siteadmin()) {
+        $capability = 'moodle/course:manageactivities';
+        $enrolled_courses = array_values(enrol_get_users_courses($USER->id));
+        $course = $enrolled_courses[0];
+        $context = context_course::instance($course->id);
+        $hascapability = has_capability('moodle/course:manageactivities', $context);
+    }else {
+        $context = context_system::instance();
+        $hascapability = has_capability('moodle/course:manageactivities', $context);
+    }
 }
 
-$haseditcapability = has_capability('tiny/cursive:view', $context);
-if (!$haseditcapability) {
+if (!$hascapability) {
     return redirect(new moodle_url('/course/index.php'), get_string('warning', 'tiny_cursive'));
 }
 
