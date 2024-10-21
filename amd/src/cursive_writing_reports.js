@@ -110,6 +110,7 @@ define(["core/ajax", "core/str", "core/templates", "./replay", './analytic_butto
                         myEvents.analytics(mid, templates, context, '', replayInstances, authIcon);
                         myEvents.checkDiff(mid, mid, '', replayInstances);
                         myEvents.replyWriting(mid, filepath, '', replayInstances);
+                        myEvents.quality(userid, templates, context, '', replayInstances, authIcon);
                     }).fail(error => {
                         throw new Error('Error: ' + error.message);
                     });

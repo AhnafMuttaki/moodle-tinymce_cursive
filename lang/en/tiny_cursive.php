@@ -102,6 +102,7 @@ $string['queswise'] = 'Question-wise';
 $string['quizname'] = 'Activity name';
 $string['random_reflex'] = 'Your Random Reflection Prompt';
 $string['replay'] = 'Replay';
+$string['quality'] = 'Quality';
 $string['secretkey'] = 'Cursive Secret Key';
 $string['secretkey_desc'] = 'The API Secret Key of Cursive account';
 $string['select_course'] = 'Select Course';

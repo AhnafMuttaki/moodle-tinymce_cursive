@@ -208,6 +208,7 @@ define([
                 myEvents.analytics(userid, templates, context, '', replayInstances, '', authIcon);
                 myEvents.checkDiff(userid, data.data.file_id, '', replayInstances);
                 myEvents.replyWriting(userid, filepath, '', replayInstances);
+                myEvents.quality(userid, templates, context, '', replayInstances, '', authIcon);
             });
             return com.usercomment;
         },

@@ -154,6 +154,7 @@ define([
                             myEvents.analytics(userid, templates, context, questionid, replayInstances, authIcon);
                             myEvents.checkDiff(userid, data.data.file_id, questionid, replayInstances);
                             myEvents.replyWriting(userid, filepath, questionid, replayInstances);
+                            myEvents.quality(userid, templates, context, questionid, replayInstances, authIcon);
                         }
                     }
                 });

@@ -127,6 +127,8 @@ define(["core/ajax", "core/str", "core/templates", "./replay", "./analytic_butto
                         myEvents.analytics(ids, templates, context, '', replayInstances, authIcon);
                         myEvents.checkDiff(ids, data.data.file_id, '', replayInstances);
                         myEvents.replyWriting(ids, filepath, '', replayInstances);
+                        myEvents.quality(userid, templates, context, '', replayInstances, authIcon);
+                        
                     }
                 });
                 return com.usercomment;
