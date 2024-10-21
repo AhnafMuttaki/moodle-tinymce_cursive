@@ -34,6 +34,12 @@ function xmldb_tiny_cursive_install() {
     // Ensure the web service is enabled.
     enable_webservice();
     enable_webservice_protocol('rest');
+    $service = $DB->get_record('external_services', ['shortname' => 'moodle_mobile_app']);
+
+    if (!$service->enabled) {
+        $service->enabled = true;
+        $DB->update_record('external_services', $service);
+    }
 
     $token = create_token_for_user();
 
