@@ -244,6 +244,11 @@ export default class AnalyticEvents {
                                 $('#content' + userid).html(nodata);
                             }
                             //  metricsData.p_burst_cnt,'P-burst Count', metricsData.total_active_time, 'Total Active Time',
+                            let allSessionPBurst = metricsData.all_session_p_burst_cnt;
+                            let thisSessionPBurst = metricsData.p_burst_cnt;
+                            $('#pburst_total').text(allSessionPBurst);
+                            $('#pburst_this_session').text(thisSessionPBurst);
+
                             var originalData = [
                                 metricsData.word_len_mean, metricsData.edits, metricsData.p_burst_mean,
                                 metricsData.q_count, metricsData.sentence_count,

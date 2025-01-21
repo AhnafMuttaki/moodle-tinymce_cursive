@@ -2372,6 +2372,9 @@ class cursive_json_func_data extends external_api {
                     round(($pburstcnt / $allsessionpburstcnt - 1) * 100, 2) : 0;
                 $calculateddata->total_active_time = $allsessiontotalactivetime != 0 ?
                     round(($totalactivetime / $allsessiontotalactivetime - 1) * 100, 2) : 0;
+                $calculateddata->all_session_p_burst_cnt = intval($allsessionpburstcnt) ?? 0;
+                $calculateddata->pburstcount = intval($pburstcnt) ?? 0;
+
 
                 // foreach ($defaults as $key => &$default) {
                 // $default = floatval(get_config('tiny_cursive', $key) ?: $default);
@@ -2442,6 +2445,8 @@ class cursive_json_func_data extends external_api {
                 'sent_word_count_mean' => new external_value(PARAM_FLOAT, 'Average words per sentence'),
                 'p_burst_mean' => new external_value(PARAM_FLOAT, 'Average pause burst duration'),
                 'p_burst_cnt' => new external_value(PARAM_FLOAT, 'Number of pause bursts'),
+                'all_session_p_burst_cnt' => new external_value(PARAM_INT, 'Number of pause bursts'),
+                'pburstcount' => new external_value(PARAM_INT, 'Number of pause bursts'),
                 'quality_access' => new external_value(PARAM_INT, 'Quality access'),
             ]),
 

@@ -118,7 +118,7 @@ function xmldb_tiny_cursive_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2024060283, 'tiny', 'cursive');
     }
 
-    if ($oldversion < 2024060289) {
+    if ($oldversion < 2024060305) {
 
         $table = new xmldb_table('tiny_cursive_quality_metrics');
 
@@ -263,7 +263,7 @@ function xmldb_tiny_cursive_upgrade($oldversion) {
         }
 
         // Save the upgrade step.
-        upgrade_plugin_savepoint(true, 2024060289, 'tiny', 'cursive');
+        upgrade_plugin_savepoint(true, 2024060305, 'tiny', 'cursive');
     }
 
     return true;
