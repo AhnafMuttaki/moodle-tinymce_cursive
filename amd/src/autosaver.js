@@ -216,7 +216,6 @@ export const register = (editor, interval, userId) => {
         }
 
         filename = `${userid}_${resourceId}_${cmid}_${modulename}_attempt`;
-        console.log(filename);
 
         if (modulename === 'quiz') {
             questionid = editorid.split(':')[1].split('_')[0];
@@ -275,7 +274,6 @@ export const register = (editor, interval, userId) => {
         }
     });
     editor.on('keyDown', (editor) => {
-        console.log(editor.key);
         let position = getCaretPosition();
         editor.caretPosition = position.caretPosition;
         editor.rePosition = position.rePosition;
