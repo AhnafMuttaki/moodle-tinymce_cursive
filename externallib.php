@@ -828,7 +828,7 @@ class cursive_json_func_data extends external_api {
         self::validate_context($context);
         require_capability('tiny/cursive:view', $context);
 
-        $conditions = ["resourceid" => $params['id']];
+        $conditions = ["resourceid" => $params['id'], 'modulename' => "forum"];
         $table = 'tiny_cursive_comments';
         $recs = $DB->get_records($table, $conditions);
 
@@ -1777,12 +1777,14 @@ class cursive_json_func_data extends external_api {
         self::validate_context($context);
         require_capability("tiny/cursive:writingreport", $context);
 
-        $sql = "SELECT WD.*, CF.cmid, CF.resourceid, CF.modulename, COUNT(CC.id) AS commentscount
+        $sql = "SELECT WD.*, CF.cmid, CF.resourceid, CF.modulename, COUNT(CC.id) AS commentscount, CF.userid, CF.questionid
                   FROM {tiny_cursive_writing_diff} WD
                   JOIN {tiny_cursive_files} CF ON CF.id = WD.file_id
              LEFT JOIN {tiny_cursive_comments} CC ON CC.resourceid = CF.resourceid 
                                                 AND CC.modulename = CF.modulename 
                                                 AND CC.cmid = CF.cmid
+                                                AND CC.userid = CF.userid
+                                                AND CC.questionid = CF.questionid
                  WHERE WD.file_id = :fileid
               GROUP BY WD.id, CF.cmid, CF.resourceid, CF.modulename";
 
@@ -1795,6 +1797,8 @@ class cursive_json_func_data extends external_api {
                 'resourceid' => $data->resourceid,
                 'modulename' => $data->modulename,
                 'cmid' => $data->cmid,
+                'userid' => $data->userid,
+                'questionid' => $data->questionid
             ],
         );
         $data->comments = $comments;
@@ -1863,6 +1867,7 @@ class cursive_json_func_data extends external_api {
                 'modulename' => new external_value(PARAM_TEXT, 'Modulename', VALUE_DEFAULT, ""),
                 'editorid' => new external_value(PARAM_TEXT, 'editorid', VALUE_DEFAULT, ""),
                 'json_data' => new external_value(PARAM_TEXT, 'JSON Data', VALUE_DEFAULT, ""),
+                "originalText" => new external_value(PARAM_TEXT, 'original submission Text', VALUE_DEFAULT, ""),
             ],
         );
     }
@@ -1889,6 +1894,7 @@ class cursive_json_func_data extends external_api {
         $modulename = 'quiz',
         $editorid = null,
         $jsondata = [],
+        $originaltext
     ) {
         global $USER, $DB, $CFG;
 
@@ -1903,6 +1909,7 @@ class cursive_json_func_data extends external_api {
                 'modulename' => $modulename,
                 'editorid' => $editorid,
                 'json_data' => $jsondata,
+                'originalText' => $originaltext
             ],
         );
 
@@ -1974,6 +1981,7 @@ class cursive_json_func_data extends external_api {
                 array_push($temparray, $userdata);
             }
             $inp->content = json_encode($temparray);
+            $inp->original_content = $params['originalText'];
             $inp->uploaded = 0;
             $DB->update_record($table, $inp);
             return 'true';
@@ -1987,6 +1995,7 @@ class cursive_json_func_data extends external_api {
             $dataobj->timemodified = time();
             $dataobj->filename = $fname;
             $dataobj->content = $params['json_data'];
+            $dataobj->original_content = $params['originalText'];
             $dataobj->questionid = $questionid ?? 0;
             $dataobj->uploaded = 0;
             $DB->insert_record($table, $dataobj);

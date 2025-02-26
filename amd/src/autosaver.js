@@ -37,7 +37,7 @@ export const register = (editor, interval, userId) => {
     var quizSubmit = jQuery('#mod_quiz-next-nav');
     var ed = "";
     var event = "";
-    var recourceId = 0;
+    var resourceId = 0;
     var modulename = "";
     var editorid = editor?.id;
     var cmid = M.cfg.contextInstanceId;
@@ -86,13 +86,14 @@ export const register = (editor, interval, userId) => {
 
         Promise.all([
             getString('tiny_cursive_srcurl', 'tiny_cursive'),
-            getString('tiny_cursive_srcurl_des', 'tiny_cursive')
-        ]).then(function([title, titledes]) {
+            getString('tiny_cursive_srcurl_des', 'tiny_cursive'),
+            getString('tiny_cursive_placeholder', 'tiny_cursive')
+        ]).then(function([title, titledes, placeholder]) {
 
             return create({
                 type: 'SAVE_CANCEL',
                 title: `<div><div style='color:dark;font-weight:500;line-height:0.5'>${title}</div><span style='color: gray;font-weight: 400;line-height: 1.2;font-size: 14px;display: inline-block;margin-top: .5rem;'>${titledes}</span></div>`,
-                body: '<textarea  class="form-control inputUrl" value="" id="inputUrl" placeholder="Write your comment, links or informations here.."></textarea>',
+                body: `<textarea  class="form-control inputUrl" value="" id="inputUrl" placeholder="${placeholder}"></textarea>`,
     
                 removeOnClose: true,
             })
@@ -111,7 +112,7 @@ export const register = (editor, interval, userId) => {
                             editor.execCommand('Paste');
                         }
                         let ur = e.srcElement.baseURI;
-                        let recourceId = 0;
+                        let resourceId = 0;
                         let parm = new URL(ur);
                         let modulename = "";
                         let editorid = editor?.id;
@@ -122,19 +123,22 @@ export const register = (editor, interval, userId) => {
                         if (ur.includes("attempt.php") || ur.includes("forum") || ur.includes("assign")) { } else {
                             return false;
                         }
-    
+                        if (ur.includes("forum") && !ur.includes("assign")) {
+                            resourceId = parm.searchParams.get('edit');
+                         }
                         if (!ur.includes("forum") && !ur.includes("assign")) {
-                            recourceId = parm.searchParams.get('attempt');
+                            resourceId = parm.searchParams.get('attempt');
                         }
     
-                        if (recourceId === null) {
-                            recourceId = 0;
+                        if (resourceId === null) {
+                            resourceId = 0;
                         }
                         if (ur.includes("forum")) {
                             modulename = "forum";
                         }
                         if (ur.includes("assign")) {
                             modulename = "assign";
+                            resourceId = cmid;
                         }
                         if (ur.includes("attempt")) {
                             modulename = "quiz";
@@ -146,7 +150,7 @@ export const register = (editor, interval, userId) => {
                         postOne('cursive_user_comments', {
                             modulename: modulename,
                             cmid: cmid,
-                            resourceid: recourceId,
+                            resourceid: resourceId,
                             courseid: courseid,
                             usercomment: number,
                             timemodified: Date.now(),
@@ -182,14 +186,14 @@ export const register = (editor, interval, userId) => {
         }
         // eslint-disable-next-line
         if (ur.includes("forum") && !ur.includes("assign")) {
-           recourceId = parm.searchParams.get('edit');
+           resourceId = parm.searchParams.get('edit');
         } else {
 
-            recourceId = parm.searchParams.get('attempt');
+            resourceId = parm.searchParams.get('attempt');
         }
-        if (recourceId === null) {
+        if (resourceId === null) {
 
-            recourceId = 0;
+            resourceId = 0;
         }
 
         if (ur.includes("forum")) {
@@ -197,16 +201,17 @@ export const register = (editor, interval, userId) => {
         }
         if (ur.includes("assign")) {
             modulename = "assign";
+            resourceId = cmid;
         }
         if (ur.includes("attempt")) {
             modulename = "quiz";
         }
 
-        filename = `${userid}_${recourceId}_${cmid}_${modulename}_attempt`;
+        filename = `${userid}_${resourceId}_${cmid}_${modulename}_attempt`;
 
         if (modulename === 'quiz') {
             questionid = editorid.split(':')[1].split('_')[0];
-            filename = `${userid}_${recourceId}_${cmid}_${questionid}_${modulename}_attempt`;
+            filename = `${userid}_${resourceId}_${cmid}_${questionid}_${modulename}_attempt`;
 
         }
 
@@ -214,7 +219,7 @@ export const register = (editor, interval, userId) => {
 
             let data = JSON.parse(localStorage.getItem(filename));
             data.push({
-                resourceId: recourceId,
+                resourceId: resourceId,
                 key: ed.key,
                 keyCode: ed.keyCode,
                 event: event,
@@ -227,7 +232,7 @@ export const register = (editor, interval, userId) => {
         } else {
             let data = [];
             data.push({
-                resourceId: recourceId,
+                resourceId: resourceId,
                 key: ed.key,
                 keyCode: ed.keyCode,
                 event: event,
@@ -276,17 +281,19 @@ export const register = (editor, interval, userId) => {
             return;
         } else {
             localStorage.removeItem(filename);
+            let originalText = editor.getContent({ format: 'text' });
             try {
                 // eslint-disable-next-line
                 return await postOne('cursive_write_local_to_json', {
                     key: ed.key,
                     event: event,
                     keyCode: ed.keyCode,
-                    resourceId: recourceId,
+                    resourceId: resourceId,
                     cmid: cmid,
                     modulename: modulename,
                     editorid: editorid,
                     "json_data": data,
+                    originalText: originalText
                 });
             } catch (error) {
                 window.console.error('Error submitting data:', error);
