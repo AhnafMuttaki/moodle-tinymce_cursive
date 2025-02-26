@@ -20,10 +20,10 @@
  * @author kuldeep singh <mca.kuldeep.sekhon@gmail.com>
  */
 
-import {call} from 'core/ajax';
-import {create} from 'core/modal_factory';
-import {get_string as getString} from 'core/str';
-import {save, cancel, hidden} from 'core/modal_events';
+import { call } from 'core/ajax';
+import { create } from 'core/modal_factory';
+import { get_string as getString } from 'core/str';
+import { save, cancel, hidden } from 'core/modal_events';
 import jQuery from 'jquery';
 
 export const register = (editor, interval, userId) => {
@@ -44,8 +44,12 @@ export const register = (editor, interval, userId) => {
     var questionid = 0;
     let assignSubmit = jQuery('#id_submitbutton');
     var syncInterval = interval ? interval * 1000 : 10000; // Default: Sync Every 10s.
+    var lastCaretPos = 1;
+    // var skipKeys = ["Shift", "Ctrl", "Alt", "ArrowDown", "ArrowUp", "Control", "ArrowRight",
+    //     "ArrowLeft", "Meta", "CapsLock", "Escape", "Delete", "PageUp", "PageDown",
+    //     "Insert", "Home", "End", "NumLock"];
 
-    const postOne = async(methodname, args) => {
+    const postOne = async (methodname, args) => {
         try {
             const response = await call([{
                 methodname,
@@ -58,8 +62,9 @@ export const register = (editor, interval, userId) => {
         }
     };
 
-    assignSubmit.on('click', async function(e) {
+    assignSubmit.on('click', async function (e) {
         e.preventDefault();
+        sessionStorage.removeItem(`${userid}_${resourceId}_${cmid}_position`);
         if (filename) {
             // eslint-disable-next-line
             syncData().then(() => {
@@ -70,8 +75,9 @@ export const register = (editor, interval, userId) => {
         }
     });
 
-    quizSubmit.on('click', async function(e) {
+    quizSubmit.on('click', async function (e) {
         e.preventDefault();
+        sessionStorage.removeItem(`${userid}_${resourceId}_${cmid}_position`);
         if (filename) {
             // eslint-disable-next-line
             syncData().then(() => {
@@ -88,13 +94,13 @@ export const register = (editor, interval, userId) => {
             getString('tiny_cursive_srcurl', 'tiny_cursive'),
             getString('tiny_cursive_srcurl_des', 'tiny_cursive'),
             getString('tiny_cursive_placeholder', 'tiny_cursive')
-        ]).then(function([title, titledes, placeholder]) {
+        ]).then(function ([title, titledes, placeholder]) {
 
             return create({
                 type: 'SAVE_CANCEL',
                 title: `<div><div style='color:dark;font-weight:500;line-height:0.5'>${title}</div><span style='color: gray;font-weight: 400;line-height: 1.2;font-size: 14px;display: inline-block;margin-top: .5rem;'>${titledes}</span></div>`,
                 body: `<textarea  class="form-control inputUrl" value="" id="inputUrl" placeholder="${placeholder}"></textarea>`,
-    
+
                 removeOnClose: true,
             })
                 .done(modal => {
@@ -102,7 +108,7 @@ export const register = (editor, interval, userId) => {
                     modal.show();
                     var lastEvent = '';
                     // eslint-disable-next-line
-                    modal.getRoot().on(save, function() {
+                    modal.getRoot().on(save, function () {
                         var number = document.getElementById("inputUrl").value;
                         if (number === "" || number === null || number === undefined) {
                             editor.execCommand('Undo');
@@ -118,18 +124,18 @@ export const register = (editor, interval, userId) => {
                         let editorid = editor?.id;
                         let courseid = M.cfg.courseId;
                         let cmid = M.cfg.contextInstanceId;
-    
+
                         // eslint-disable-next-line
                         if (ur.includes("attempt.php") || ur.includes("forum") || ur.includes("assign")) { } else {
                             return false;
                         }
                         if (ur.includes("forum") && !ur.includes("assign")) {
                             resourceId = parm.searchParams.get('edit');
-                         }
+                        }
                         if (!ur.includes("forum") && !ur.includes("assign")) {
                             resourceId = parm.searchParams.get('attempt');
                         }
-    
+
                         if (resourceId === null) {
                             resourceId = 0;
                         }
@@ -146,7 +152,7 @@ export const register = (editor, interval, userId) => {
                         if (cmid === null) {
                             cmid = 0;
                         }
-    
+
                         postOne('cursive_user_comments', {
                             modulename: modulename,
                             cmid: cmid,
@@ -159,12 +165,12 @@ export const register = (editor, interval, userId) => {
                         lastEvent = 'save';
                         modal.destroy();
                     });
-                    modal.getRoot().on(cancel, function() {
-    
+                    modal.getRoot().on(cancel, function () {
+
                         editor.execCommand('Undo');
                         lastEvent = 'cancel';
                     });
-                    modal.getRoot().on(hidden, function() {
+                    modal.getRoot().on(hidden, function () {
                         if (lastEvent != 'cancel' && lastEvent != 'save') {
                             editor.execCommand('Undo');
                         }
@@ -172,7 +178,7 @@ export const register = (editor, interval, userId) => {
                     return modal;
                 });
         });
-        
+
     };
     // eslint-disable-next-line
     const sendKeyEvent = (events, eds) => {
@@ -181,18 +187,17 @@ export const register = (editor, interval, userId) => {
         ed = eds;
         event = events;
         // eslint-disable-next-line
-        if (ur.includes("attempt.php") || ur.includes("forum") || ur.includes("assign")) { } else {
+        if (ur.includes("attempt.php") || ur.includes("forum") || ur.includes("assign") || ur.includes("lesson")) { } else {
             return false;
         }
         // eslint-disable-next-line
         if (ur.includes("forum") && !ur.includes("assign")) {
-           resourceId = parm.searchParams.get('edit');
+            resourceId = parm.searchParams.get('edit');
         } else {
 
             resourceId = parm.searchParams.get('attempt');
         }
         if (resourceId === null) {
-
             resourceId = 0;
         }
 
@@ -205,6 +210,9 @@ export const register = (editor, interval, userId) => {
         }
         if (ur.includes("attempt")) {
             modulename = "quiz";
+        }
+        if(ur.includes("lesson")){
+            modulename = "lesson";
         }
 
         filename = `${userid}_${resourceId}_${cmid}_${modulename}_attempt`;
@@ -226,7 +234,9 @@ export const register = (editor, interval, userId) => {
                 courseId: courseid,
                 unixTimestamp: Date.now(),
                 clientId: host,
-                personId: userid
+                personId: userid,
+                position: ed.caretPosition,
+                rePosition: ed.rePosition
             });
             localStorage.setItem(filename, JSON.stringify(data));
         } else {
@@ -239,31 +249,131 @@ export const register = (editor, interval, userId) => {
                 courseId: courseid,
                 unixTimestamp: Date.now(),
                 clientId: host,
-                personId: userid
+                personId: userid,
+                position: ed.caretPosition,
+                rePosition: ed.rePosition
             });
             localStorage.setItem(filename, JSON.stringify(data));
         }
 
     };
     editor.on('keyUp', (editor) => {
+        let position = getCaretPosition(true);
+        editor.caretPosition = position.caretPosition;
+        editor.rePosition = position.rePosition;
         sendKeyEvent("keyUp", editor);
     });
-    editor.on('Paste', async(e) => {
+    editor.on('Paste', async (e) => {
         if (isStudent && intervention) {
             getModal(e);
         }
     });
-    editor.on('Redo', async(e) => {
+    editor.on('Redo', async (e) => {
         if (isStudent && intervention) {
             getModal(e);
         }
     });
     editor.on('keyDown', (editor) => {
+        let position = getCaretPosition();
+        editor.caretPosition = position.caretPosition;
+        editor.rePosition = position.rePosition;
         sendKeyEvent("keyDown", editor);
+
+
     });
+    editor.on('mouseDown', async (editor) => {
+        constructMouseEvent(editor);
+        sendKeyEvent("mouseDown", editor);
+    });
+    editor.on('mouseUp', async (editor) => {
+        constructMouseEvent(editor);
+        sendKeyEvent("mouseUp", editor);
+    });
+
     // eslint-disable-next-line
     editor.on('init', () => {
+        // editor.on('KeyUp MouseUp click NodeChange SetContent', function(e) {
+        //     try {
+        //         const currentPos = getCaretPosition();
+        //         lastCaretPos = currentPos;
+        //     } catch (error) {
+        //         console.warn('Error updating caret position:', error);
+        //     }
+        // });
     });
+
+    function constructMouseEvent(editor) {
+        let position = getCaretPosition();
+        editor.caretPosition = position.caretPosition;
+        editor.rePosition = position.rePosition;
+        editor.key = getMouseButton(editor);
+        editor.keyCode = editor.button;
+
+    }
+    function getMouseButton(editor) {
+
+        switch (editor.button) {
+            case 0:
+                return 'left';
+            case 1:
+                return 'middle';
+            case 2:
+                return 'right';
+        }
+    }
+
+    function getCaretPosition(skip = false) {
+        try {
+            if (!editor || !editor.selection) {
+                return 0;
+            }
+
+            const rng = editor.selection.getRng();
+
+            if (skip) {
+                return {
+                    caretPosition: lastCaretPos,
+                    rePosition: rng.startOffset + 1
+                };
+            }
+
+            const storageKey = `${userid}_${resourceId}_${cmid}_position`;
+
+            let storedPos = parseInt(sessionStorage.getItem(storageKey), 10);
+            if (isNaN(storedPos)) {
+                storedPos = 0;
+            }
+
+            storedPos++;
+            lastCaretPos = storedPos;
+
+
+            sessionStorage.setItem(storageKey, storedPos);
+
+            return {
+                caretPosition: storedPos,
+                rePosition: rng.startOffset + 1
+            };
+
+            // let node = rng.startContainer;
+
+
+            // Calculate position by walking through previous nodes
+            // while (node && node !== editor.getBody()) {
+            //     while (node.previousSibling) {
+            //         node = node.previousSibling;
+            //         if (node.textContent) {
+            //             position += node.textContent.length;
+            //         }
+            //     }
+            //     node = node.parentNode;
+            // }
+
+        } catch (e) {
+            console.warn('Error getting caret position:', e);
+            return 0;
+        }
+    }
 
     /**
      * Synchronizes data from localStorage to server
@@ -303,6 +413,7 @@ export const register = (editor, interval, userId) => {
 
     window.addEventListener('unload', () => {
         syncData();
+        sessionStorage.setItem(`${userid}_${resourceId}_${cmid}_position`, lastCaretPos);
     });
 
     setInterval(syncData, syncInterval);
