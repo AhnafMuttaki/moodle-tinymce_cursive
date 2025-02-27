@@ -91,7 +91,7 @@ define(["jquery", "core/ajax", "core/str", "core/templates", "./replay", "./anal
                 let com = AJAX.call([{methodname, args}]);
                 com[0].done(function(json) {
                     var data = JSON.parse(json);
-
+  
                     if (data.data.filename) {
 
                         var content = $('.que.essay .editquestion a[href*="question/bank/editquestion/question.php"][href*="&id='
