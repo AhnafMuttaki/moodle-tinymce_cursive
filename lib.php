@@ -336,6 +336,13 @@ function tiny_cursive_before_footer() {
                         [$confidencethreshold, $showcomments],
                     );
                     break;
+                case 'page-mod-lesson-essay':
+                        $PAGE->requires->js_call_amd(
+                            'tiny_cursive/append_lesson_grade_table',
+                            'init',
+                            [$confidencethreshold, $showcomments],
+                    );
+                
             }
         }
 

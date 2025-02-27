@@ -35,7 +35,7 @@ export default class AnalyticEvents {
             e.preventDefault();
             ModalFactory.create({type: myModal.TYPE, templateContext: context}).then(modal => {
                 modal.show();
-                const targetElement = $('#content' + userid + ' .table tbody tr:first-child td:nth-child(2)');
+                const targetElement = $('#content' + userid + ' .tiny_cursive_table tbody tr:first-child td:nth-child(2)');
                 if (targetElement.length > 0) {
                     targetElement.html(authIcon);
                 } else {
@@ -63,7 +63,7 @@ export default class AnalyticEvents {
 
             templates.render('tiny_cursive/analytics_table', context).then(function(html) {
                 $('#content' + userid).html(html);
-                $('#content' + userid + ' .table tbody tr:first-child td:nth-child(2)').html(authIcon);
+                $('#content' + userid + ' .tiny_cursive_table  tbody tr:first-child td:nth-child(2)').html(authIcon);
                 return true;
             }).fail(function(error) {
                 window.console.error("Failed to render template:", error);
@@ -73,10 +73,7 @@ export default class AnalyticEvents {
 
     checkDiff(userid, fileid, questionid = '', replayInstances = null) {
         const nodata = document.createElement('p');
-        nodata.classList.add('text-center', 'p-5', 'bg-light', 'rounded', 'm-5', 'text-primary');
-        nodata.style.verticalAlign = 'middle';
-        nodata.style.textTransform = 'uppercase';
-        nodata.style.fontWeight = '500';
+        nodata.classList.add('tiny_cursive_nopayload','bg-light');
         nodata.textContent = "no data received yet";
 
         $('body').on('click', '#diff' + userid + questionid, function(e) {
