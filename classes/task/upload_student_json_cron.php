@@ -62,10 +62,12 @@ class upload_student_json_cron extends scheduled_task {
 
         if (!$cursivetoken) {
             // Use get_record() instead of get_record_sql() for simpler queries.
-            $token = $DB->get_record('external_tokens',
-                        ['userid' => $adminuser->id, 'externalserviceid' => $service->id],
-                        '*',
-                        IGNORE_MULTIPLE);
+            $token = $DB->get_record(
+                'external_tokens',
+                ['userid' => $adminuser->id, 'externalserviceid' => $service->id],
+                '*',
+                IGNORE_MULTIPLE
+            );
         }
 
         $wstoken = $cursivetoken ?? $token->token;
@@ -77,6 +79,15 @@ class upload_student_json_cron extends scheduled_task {
 
         $table = 'tiny_cursive_files';
         foreach ($filerecords as $filerecord) {
+            // Skip records where the course module (cmid) no longer exists.
+            if (!empty($filerecord->cmid)) {
+                $coursemodule = get_coursemodule_from_id('', $filerecord->cmid);
+                if (!$coursemodule) {
+                    echo "Course module (cmid=" . $filerecord->cmid . ") no longer exists for file record ID: " .
+                        $filerecord->id . ", skipping.\n";
+                    continue;
+                }
+            }
 
             $answer = $filerecord->original_content ?? "";
 

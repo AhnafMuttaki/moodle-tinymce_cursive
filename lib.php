@@ -315,6 +315,11 @@ function tiny_cursive_upload_multipart_record($filerecord, $filenamewithfullpath
 
         $tempfilepath = make_temp_directory('tiny_cursive') . '/' . uniqid('upload_', true);
 
+        if (empty($filerecord->content)) {
+            echo "Empty content for file record ID: " . $filerecord->id . ", skipping.\n";
+            return false;
+        }
+
         $jsoncontent  = json_decode($filerecord->content, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
